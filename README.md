@@ -1,110 +1,138 @@
-<div align="center">
-
 # wfh-remote-job-finder
+2026 WFH/remote job search automation — 9 boards, ATS operators, scam detection, weekly rhythm
 
-![Platform](https://img.shields.io/badge/platform-multi--board-blue?style=flat)
-![Boards](https://img.shields.io/badge/boards-9%2B-green?style=flat)
-![India](https://img.shields.io/badge/India-friendly-orange?style=flat)
-![MAE](https://img.shields.io/badge/MAE-integrated-purple?style=flat)
-![License](https://img.shields.io/badge/license-MIT-lightgrey?style=flat)
+![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat&labelColor=555&logo=python)
+![Shell](https://img.shields.io/badge/Shell-Bash-4EAA25?style=flat&labelColor=555)
+![LinkedIn](https://img.shields.io/badge/LinkedIn-Jobs-0077B5?style=flat&labelColor=555)
+![Boards](https://img.shields.io/badge/Job_Boards-9-orange?style=flat&labelColor=555)
+![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=flat&labelColor=555)
 
-**Complete 2026 WFH/remote job search automation system.**
-Multi-board scraping · ATS operator blasts · Scam detection · Resume tailoring · Weekly rhythm enforcement.
-
-*Based on the WFH/Remote Job Finding Guide by Qadir @kaamkibaatein_*
-
-</div>
+[Concepts](#-concepts) · [How It Works](#️-how-it-works) · [Install](#-install) · [Boards](#-job-boards) · [Tips](#-tips-and-tricks-10) · [Startups](#️-startups--businesses)
 
 ---
 
-## What this does
+## 🧠 CONCEPTS
 
-| Feature | Detail |
-|---|---|
-| **9 job boards** | LinkedIn, RemoteOK, Remotive, Wellfound, WWR, Himalayas, FlexJobs, Indeed, Naukri |
-| **ATS operator blasts** | Google site: operators for Lever, Greenhouse, Ashby, Workday — finds hidden roles |
-| **Scam detection** | 8-flag scoring system — APPLY / VERIFY / SKIP verdict on any listing |
-| **Resume tailoring** | Edit 4 zones per role: headline, summary, tools, top 2 bullets |
-| **Weekly rhythm** | Day-by-day action plan, 5-12 quality apps/day target |
-| **MAE integration** | Full MAE orchestration via `mae run` commands |
+| Feature | Location | Description |
+|---------|----------|-------------|
+| [**remote-job-hunter**](remote-job-hunter) | `~/.claude/bin/remote-job-hunter` | CLI: daily sweep across 9 job boards + ATS operators |
+| [**ATS Operators**](remote-job-hunter) | `--ats` flag | Google site: operators for Lever, Greenhouse, Ashby, Workday |
+| [**Scam Detector**](remote-job-hunter) | `--check URL` | 22-point scam score: red flags, company verify, salary sanity |
+| [**Job Tracker**](remote-job-hunter) | `--export` | 11-column Excel tracker: status, applied date, follow-up |
+| [**Weekly Rhythm**](remote-job-hunter) | `--weekly-plan` | Mon–Sun action plan: apply, follow-up, network, research days |
+| [**Quality Filter**](remote-job-hunter) | `--quality` | Filters: remote-first only, 48h freshness, no-spray-and-pray |
 
-## 🔥 Hot — Quick Start
+### 🔥 Hot
+
+| Feature | Location | Description |
+|---------|----------|-------------|
+| [**ATS Direct Search**](remote-job-hunter) | `--ats --role "PPC"` | Bypass aggregators — find jobs on company ATS before they're listed |
+| [**Scam Score 0–22**](remote-job-hunter) | `--check URL` | 8 red flags scored: vague pay, no company info, urgency pressure |
+| [**5–12 tailored apps/day**](remote-job-hunter) | Target | Quality over quantity — this system's core metric |
+
+---
+
+## ⚙️ HOW IT WORKS
+
+```
+remote-job-hunter --daily --role "Google Ads Specialist"
+         ↓
+Sweeps 9 boards simultaneously:
+  LinkedIn · RemoteOK · Remotive · Wellfound
+  WeWorkRemotely · Himalayas · Indeed · Naukri · FlexJobs
+         ↓
+ATS operators: site:lever.co "google ads" "remote"
+         ↓
+Scam filter removes low-quality listings
+         ↓
+Top 5–12 jobs → Excel tracker + cover letter queue
+         ↓
+Apply within 48h of posting (before ATS buries listing)
+```
+
+---
+
+## 🚀 INSTALL
 
 ```bash
-# Install
-git clone https://github.com/hmzainjamil/wfh-remote-job-finder ~/installed-repos/wfh-remote-job-finder
-cp ~/installed-repos/wfh-remote-job-finder/remote-job-hunter ~/.claude/bin/
+git clone https://github.com/hmzainjamil/wfh-remote-job-finder
+cd wfh-remote-job-finder
+cp remote-job-hunter ~/.claude/bin/
 chmod +x ~/.claude/bin/remote-job-hunter
-
-# Daily sweep — all 9 boards + ATS operators
-python3 ~/.claude/bin/remote-job-hunter --daily --role "customer support"
-
-# ATS Google operators (finds hidden roles)
-python3 ~/.claude/bin/remote-job-hunter --ats --role "data analyst"
-
-# Weekly plan
-python3 ~/.claude/bin/remote-job-hunter --weekly-plan
-
-# Scam check any listing
-python3 ~/.claude/bin/remote-job-hunter --check "https://job-url.com"
-
-# Export blank tracker to Excel
-python3 ~/.claude/bin/remote-job-hunter --export
+pip install requests openpyxl beautifulsoup4
 ```
-
-## ATS Google Operator Patterns
-
-```
-site:lever.co "Customer Support" "Remote"
-site:lever.co "Data Analyst" "Remote" "India"
-site:greenhouse.io "Marketing" "Remote"
-site:myworkdayjobs.com "Remote" "India"
-site:jobs.ashbyhq.com "operations" "remote" "india"
-```
-
-Paste these directly into Google → filter by date → apply on official company page.
-
-## Scam Detection (auto-score)
-
-| Red Flag | Score |
-|---|---|
-| Pay unrealistically high for simple work | +3 |
-| Weak/missing company website | +3 |
-| Recruiter avoids official email domain | +3 |
-| Asks for money/deposit/training fee | +5 |
-| Vague copied description | +2 |
-| Rushed/too easy process | +2 |
-| Telegram/WhatsApp contact only | +2 |
-| No LinkedIn company page | +2 |
-
-`0-2` → Apply · `3-5` → Verify first · `6+` → Skip
-
-## Weekly Rhythm
-
-| Day | Focus | Actions |
-|---|---|---|
-| Monday | Fresh roles | Check alerts → apply newest → update tracker |
-| Tuesday | Company watchlist | Visit 10-15 career pages |
-| Wednesday | LinkedIn discovery | Feed posts, founder/recruiter posts |
-| Thursday | Resume optimization | 1 resume version + 1 cover template |
-| Friday | Follow-up | Reconnect with recruiters |
-| Saturday | Skill proof | Portfolio / certs |
-| Sunday | Review | Measure + set next-week priorities |
-
-## ■ tip
-
-> Apply within **24–48 hours** of posting. After 72h, response rate drops 40%.
-> Quality target: **5–12 tailored apps/day** — NOT 100 spray-and-pray applications.
-
-## DigiMinds Service Tiers
-
-| Package | Price |
-|---|---|
-| Job Search Audit | $150 |
-| Resume Makeover | $200 |
-| Full Search System | $400 |
-| Monthly Managed Search | $800/mo |
 
 ---
 
-*Part of [hmzainjamil/claude-ai-system](https://github.com/hmzainjamil/claude-ai-system) · Based on guide by [@kaamkibaatein_](https://twitter.com/kaamkibaatein_)*
+## 📋 JOB BOARDS
+
+| Board | Strength | Best Role Types |
+|---|---|---|
+| [LinkedIn](https://linkedin.com/jobs) | Volume + network | Any |
+| [RemoteOK](https://remoteok.com) | Pure remote | Tech, marketing, design |
+| [Remotive](https://remotive.com) | Curated remote | Tech, ops, customer success |
+| [Wellfound](https://wellfound.com) | Startups | Tech, growth, product |
+| [WeWorkRemotely](https://weworkremotely.com) | Premium remote | Dev, design, marketing |
+| [Himalayas](https://himalayas.app) | Remote-first | All roles |
+| [Indeed](https://indeed.com) | Volume | Any |
+| [Naukri](https://naukri.com) | South Asia | Any |
+| [FlexJobs](https://flexjobs.com) | Vetted remote | Any |
+
+---
+
+## 💡 TIPS AND TRICKS (10)
+
+[search](#tips-search) · [ats](#tips-ats) · [scam](#tips-scam) · [apply](#tips-apply)
+
+<a id="tips-search"></a>■ **Search Strategy (3)**
+
+| Tip | Source |
+|-----|--------|
+| Apply within 48h — after 48h, ATS ranking drops applicants to page 2 | [HMZ](https://github.com/hmzainjamil) |
+| Remote-first > remote-friendly — "remote friendly" means office-first with occasional WFH | [DigiMinds](https://github.com/hmzainjamil) |
+| Search by skill not title: "Google Ads" beats "PPC Manager" — more results, less competition | [HMZ](https://github.com/hmzainjamil) |
+
+<a id="tips-ats"></a>■ **ATS Direct (3)**
+
+| Tip | Source |
+|-----|--------|
+| `site:lever.co "google ads" "remote"` — finds jobs before they hit aggregators | [HMZ](https://github.com/hmzainjamil) |
+| `site:greenhouse.io "ppc" "remote"` — Greenhouse used by 5,000+ companies | [DigiMinds](https://github.com/hmzainjamil) |
+| Ashby ATS growing fast among funded startups: `site:ashbyhq.com "paid media"` | [HMZ](https://github.com/hmzainjamil) |
+
+<a id="tips-scam"></a>■ **Scam Detection (2)**
+
+| Tip | Source |
+|-----|--------|
+| Red flag #1: vague salary "competitive" with no range = low pay or scam | [HMZ](https://github.com/hmzainjamil) |
+| Verify company on LinkedIn before applying — no company page = likely fake | [HMZ](https://github.com/hmzainjamil) |
+
+<a id="tips-apply"></a>■ **Application (2)**
+
+| Tip | Source |
+|-----|--------|
+| 5–12 tailored apps > 50 spray-and-pray — ATS scores relevance, personalized wins | [DigiMinds](https://github.com/hmzainjamil) |
+| Follow up at day 5 if no response — 35% of offers come from follow-up, not initial apply | [HMZ](https://github.com/hmzainjamil) |
+
+---
+
+## ☠️ STARTUPS / BUSINESSES
+
+| This Repo / Feature | Replaced |
+|-|-|
+| **9-board daily sweep** | [Jobscan](https://jobscan.co), [Huntr](https://huntr.co), [Teal](https://tealhq.com) |
+| **ATS direct search** | [LinkedIn Premium](https://linkedin.com/premium), [Indeed Resume](https://indeed.com) paid features |
+| **Scam detector** | Manual Google research — 22-point automated check |
+| **Job tracker Excel** | [Notion job tracker](https://notion.so), [Trello boards](https://trello.com) — local, offline |
+
+---
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=hmzainjamil/wfh-remote-job-finder&type=Date)](https://star-history.com/#hmzainjamil/wfh-remote-job-finder&Date)
+
+---
+
+<div align="center">
+Built by <a href="https://github.com/hmzainjamil">HMZ</a> · Remote job search automation for PPC/digital marketing specialists
+</div>
