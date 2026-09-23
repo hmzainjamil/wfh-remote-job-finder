@@ -1,5 +1,9 @@
 # wfh-remote-job-finder
 
+<!-- HMZ PORTFOLIO STANDARD -->
+> Portfolio status: active · Visibility: public · Source of truth: current repository source.
+<!-- END HMZ PORTFOLIO STANDARD -->
+
 > **WFH Remote Job Finder** — LinkedIn+Indeed only, UK/USA/Canada/AUS clients, SEM/PPC specialist targeting with strict quality filters.
 
 <p align="center">
