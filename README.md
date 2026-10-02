@@ -1,154 +1,56 @@
-# wfh-remote-job-finder
+# WFH Remote Job Finder
 
-> **WFH Remote Job Finder** — LinkedIn+Indeed only, UK/USA/Canada/AUS clients, SEM/PPC specialist targeting with strict quality filters.
+A Python helper and companion guidance files for planning remote job searches. The script builds job-board URLs and ATS search operators, prints a weekly plan, asks the user to score listing risk flags, and can export a blank Excel tracker. It does not scrape listings, verify jobs, submit applications, tailor resumes, or create a company watchlist.
 
-<p align="center"><a href="https://github.com/hmzainjamil/wfh-remote-job-finder">Repository</a> · <a href="https://github.com/hmzainjamil/wfh-remote-job-finder/commits/main">Commits</a> · <a href="https://github.com/hmzainjamil/wfh-remote-job-finder/issues">Issues</a></p>
-<p align="center"><img alt="Documentation" src="https://img.shields.io/badge/documentation-deep%20editorial-lightgrey"> <img alt="Lifecycle" src="https://img.shields.io/badge/lifecycle-active-success"></p>
+## Repository map
 
-<!-- HMZ DEEP README v1 -->
-
-## At a glance
-
-| Field | Current state |
+| Path | Purpose |
 |---|---|
-| Repository | wfh-remote-job-finder |
-| Visibility | Public |
-| Lifecycle | Active |
-| Evidence basis | Current repository documentation and source-visible material |
+| `remote-job-hunter` | Standalone Python CLI for URL/operator generation, manual scam-flag scoring, weekly-plan output, and blank tracker export |
+| `SKILL.md` | Search prompts, board list, ATS examples, and general job-search guidance |
+| `remote-job-hunter-agent.md` | Agent behavior proposal; includes capabilities and service claims beyond the checked-in CLI |
+| `README.md` | Repository guide |
 
-## Why this exists
+The guidance files are not wired into a Claude Code installation by this repository. The agent document describes resume tailoring and company watchlists, but those features are not implemented in the tracked script.
 
-**WFH Remote Job Finder** — LinkedIn+Indeed only, UK/USA/Canada/AUS clients, SEM/PPC specialist targeting with strict quality filters.
+## Requirements
 
-This README focuses on the repository's documented scope and separates implementation claims from plans, external dependencies, and unsupported outcomes.
+- Python 3
+- The standard library for URL/operator generation and other CLI modes
+- Optional `openpyxl` for `--export`
+- Optional local executable at `~/.claude/bin/llm-burst` for the AI analysis portion of `--daily`
 
-## 🧠 CONCEPTS
+No dependency manifest or automated tests are included. The script creates `~/Downloads/job-search` when it starts.
 
-| Feature | Location | Description |
-|---|---|---|
-| CoreEngine | `core/engine.py` | Primary execution logic and orchestration layer |
-| ConfigManager | `config/manager.py` | Environment validation, hot-reload, API key checks |
-| ProviderAdapters | `adapters/` | Per-provider API wrappers with auth + retry logic |
-| TierRouter | `routing/tier0.py` | Ollama→DeepSeek→Gemini→Groq→GPT cost ladder |
-| OutputFormatter | `output/formatter.py` | Caveman-compressed, signal-dense output pipeline |
-| LogManager | `logs/manager.py` | Structured JSON logging to ~/.claude/tcc-logs/ |
-| HookHandler | `hooks/handler.py` | SessionStart/Stop integration for Claude Code |
-| RetryLogic | `core/retry.py` | Exponential backoff + alt-provider on persistent failure |
-| StatusTracker | `core/status.py` | Per-operation metrics: latency, cost, confidence scores |
-| Scheduler | `schedule/scheduler.py` | LaunchAgent-based cron scheduling for automation |
+## Use
 
-## ⚙️ HOW IT WORKS
-
-```
-Input / Trigger (CLI command or hook event)
-    │
-    ▼
-ConfigManager: load .env, validate all provider API keys
-    │
-    ▼
-TierRouter: Ollama → DeepSeek → Gemini → Groq → GPT
-    │        (cost-ordered; local-first enforced always)
-    ▼
-CoreEngine: primary processing with selected provider adapter
-    │
-    ├── ProviderAdapter: API call with rate-limit handling
-    ├── RetryLogic: exponential backoff + alt provider on failure
-    ├── StatusTracker: record latency, cost, confidence score
-    │
-    ▼
-OutputFormatter: caveman-compress result to signal-dense format
-    │
-    ▼
-LogManager: persist full run record to ~/.claude/tcc-logs/
-    │
-    ▼
-stdout / file output / hook callback response
-```
-
-## 🚀 INSTALL
+Run from the repository root:
 
 ```bash
-git clone https://github.com/hmzainjamil/wfh-remote-job-finder
-cd wfh-remote-job-finder
-pip install -r requirements.txt
-cp .env.example .env
-# Fill in: GROQ_API_KEY, GEMINI_API_KEY, DEEPSEEK_API_KEY
-# Optional: OPENAI_API_KEY, ANTHROPIC_API_KEY (fallback only)
-python setup.py verify    # confirms all provider connections live
-python setup.py hooks     # installs Claude Code SessionStart/Stop hooks
-mkdir -p ~/.claude/tcc-logs/  # create log directory
+python3 remote-job-hunter --boards-list --role "marketing" --location "Canada"
+python3 remote-job-hunter --ats --role "data analyst"
+python3 remote-job-hunter --weekly-plan
+python3 remote-job-hunter --check "https://example.com/job"
+python3 remote-job-hunter --export
+python3 remote-job-hunter --daily --role "customer support" --location "India"
 ```
 
-## 📟 USAGE
+The supported board keys in the script are LinkedIn, Remote OK, Remotive, Wellfound, We Work Remotely, Himalayas, FlexJobs, Indeed, and Naukri. The script formats search URLs; it does not open a browser or confirm that a listing exists. Search sites may change their URL formats.
 
-```bash
-# Primary usage — single command fires full pipeline
-python main.py "your goal or task description here"
+`--check` asks the user yes/no questions for eight scam indicators and totals the selected weights. It is a self-reported checklist, not an automated verification or fraud detector. `--export` writes an empty tracker workbook. `--daily` writes a Markdown search sheet and calls `~/.claude/bin/llm-burst` when available; without it, the script records a fallback message.
 
-# Specify provider explicitly (skip auto-routing)
-python main.py --provider groq "summarize this document quickly"
+## Data and safety
 
-# Output to file (default: stdout)
-python main.py "task description" --output ~/Downloads/result.md
+The daily mode sends a prompt containing the requested role to the local `llm-burst` executable, which may route it to configured model providers. This repository does not establish which providers are configured or how they handle data. Review that executable and configuration before use. Do not send private resumes, contact details, or employer data through it without understanding the destination.
 
-# Dry run — show routing plan without making any API calls
-python main.py --dry-run "test task to check routing"
+The helper only constructs links and local reports. Review each employer and listing independently, and use official employer channels before sharing personal information or paying any fee.
 
-# Verbose mode — shows provider selection, scores, latency
-python main.py --verbose "research task with full debug output"
+## Evidence and limitations
 
-# Batch mode — process multiple inputs from file
-python main.py --batch inputs.txt --output ~/Downloads/results/
-
-# Status and health verification
-python main.py status      # show all configured providers + health
-python main.py verify      # test live connections to all providers
-```
-
-## ⚙️ CONFIGURATION
-
-| Variable | Default | Description |
-|---|---|---|
-| `GROQ_API_KEY` | — | Groq Cloud API key (primary fast text provider) |
-| `GEMINI_API_KEY` | — | Google AI Studio key (long-context and multimodal) |
-| `DEEPSEEK_API_KEY` | — | DeepSeek API key (code specialist tasks) |
-| `OPENAI_API_KEY` | — | OpenAI (Tier 1 fallback; used after Tier 0 exhausted) |
-| `ANTHROPIC_API_KEY` | — | Claude (final resort; only on explicit user request) |
-| `OLLAMA_BASE_URL` | `http://localhost:11434` | Local Ollama endpoint (checked first always) |
-| `LOG_DIR` | `~/.claude/tcc-logs/` | Output log directory for all run records |
-| `TIMEOUT_S` | `30` | Per-operation timeout in seconds per provider |
-| `RETRY_COUNT` | `2` | Number of retry attempts before marking failed |
-| `CONFIDENCE_THRESHOLD` | `0.6` | Minimum confidence score to accept output (0.0-1.0) |
-| `COMPRESS_OUTPUT` | `true` | Apply caveman-compression to all outputs |
-| `LOG_LEVEL` | `INFO` | Logging verbosity: DEBUG / INFO / WARN / ERROR |
-| `LOCAL_FIRST` | `true` | Always try Ollama before any paid API call |
-| `AUTO_RETRY_ALT` | `true` | Automatically switch provider on persistent failure |
-| `OUTPUT_DIR` | `~/Downloads` | Default directory for all generated file outputs |
-
-## Validation and evidence
-
-No dedicated test or evaluation section was available in the current README.
-
-## 🔐 SECURITY CONSIDERATIONS
-
-## Limitations
-
-- Planned work is not presented as completed functionality.
-- Quantitative claims require reproducible evidence.
-- External provider behavior and pricing remain external dependencies.
-
-## 📚 RELATED REPOS IN THE HMZ AI SYSTEM
-
-| Repo | Role | Dependency |
-|---|---|---|
-| [G0DM0D3](https://github.com/hmzainjamil/G0DM0D3) | Multi-model racing + Liquid Response | Uses tier0-llm-router |
-| [mae-master-automation-engine](https://github.com/hmzainjamil/mae-master-automation-engine) | Goal decomposition + specialist swarm | Uses tcc, tier0 |
-| [tcc-task-command-center](https://github.com/hmzainjamil/tcc-task-command-center) | Parallel blast + queue + dashboard | Used by mae |
-| [tier0-llm-router](https://github.com/hmzainjamil/tier0-llm-router) | Cost-optimized routing ladder | Used by all |
-| [hermes-ai-system](https://github.com/hmzainjamil/hermes-ai-system) | Persistent agent + 80+ skills | Uses tier0, mcp |
-| [claude-ai-system-backup](https://github.com/hmzainjamil/claude-ai-system-backup) | System backup + restore | Backs up all |
-
-<div align="center">Built by <a href="https://github.com/hmzainjamil">HMZ</a> · Part of the <a href="https://github.com/hmzainjamil/claude-ai-system">HMZ Claude AI System</a> · Zero broken workflows</div>
+- Commands above are documented from the tracked script; they have not been executed as part of this README review.
+- Board URLs, availability, search results, scam thresholds, job-market advice, and weekly targets are not validated by tests or live checks.
+- The repository has no license file and GitHub metadata reports no declared license. Do not infer permission to reuse or redistribute its materials.
+- Prices and service packages in the agent reference are not verified or implemented by this CLI.
 
 ## Maintainer
 
